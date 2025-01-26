@@ -12,7 +12,8 @@ pkg_check_modules(GLIB REQUIRED glib-2.0)
 # インクルードディレクトリとリンクライブラリを設定
 include_directories( ${GSTREAMER_INCLUDE_DIRS}
                      ${GLIB_INCLUDE_DIRS}
-                     src/bus_handler)
+                     src/bus_handler
+                     src/input_controller)
 
 link_directories(${GSTREAMER_LIBRARY_DIRS} ${GLIB_LIBRARY_DIRS})
 
@@ -21,7 +22,8 @@ add_definitions(${GSTREAMER_CFLAGS_OTHER} ${GLIB_CFLAGS_OTHER})
 # 実行ファイルを作成
 add_executable( hello_world 
                 src/main.cpp 
-                src/bus_handler/bus_handler.cpp)
+                src/bus_handler/bus_handler.cpp
+                src/input_controller/input_controller.cpp)
 
 target_link_libraries( hello_world 
                        ${GSTREAMER_LIBRARIES}

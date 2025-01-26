@@ -33,8 +33,20 @@
  * MEMO: enum GstMessageType from gstreamer documentation
  * https://gstreamer.freedesktop.org/documentation/gstreamer/gstmessage.html#GstMessageType
  */
-
+namespace bus_handler {
 gboolean bus_message_callback(GstBus *bus, GstMessage *message, gpointer data);
+}
+
+enum ShowMessageType {
+  ERROR,
+  WARNING,
+  EOS,
+  STATE_CHANGED,
+  BUFFERING,
+  TAG,
+  QOS,
+  NEW_CLOCK
+};
 
 class BusHandler {
 public:
@@ -44,6 +56,10 @@ public:
 public:
   // バスメッセージハンドラ
   gboolean bus_message_handler(GstMessage *message);
+  // 出力制御用変数設定ハンドラ
+  gboolean control_bus_message_env(const gchar *str, gboolean value);
+  // 出力制御用変数取得ハンドラ
+  gboolean get_bus_message_env(const gchar *type);
 
 private:
   // メッセージハンドラ
@@ -69,28 +85,29 @@ private:
 
 public:
   // メッセージ表示設定
-  void set_show_message_error(gboolean show_message_error);
-  gboolean get_show_message_error();
+  void set_show_message_error(const gboolean show_message_error);
+  gboolean get_show_message_error() const;
 
-  void set_show_message_warning(gboolean show_message_warning);
-  gboolean get_show_message_warning();
+  void set_show_message_warning(const gboolean show_message_warning);
+  gboolean get_show_message_warning() const;
 
-  void set_show_message_eos(gboolean show_message_eos);
-  gboolean get_show_message_eos();
+  void set_show_message_eos(const gboolean show_message_eos);
+  gboolean get_show_message_eos() const;
 
-  void set_show_message_state_changed(gboolean show_message_state_changed);
-  gboolean get_show_message_state_changed();
+  void
+  set_show_message_state_changed(const gboolean show_message_state_changed);
+  gboolean get_show_message_state_changed() const;
 
-  void set_show_message_buffering(gboolean show_message_buffering);
-  gboolean get_show_message_buffering();
+  void set_show_message_buffering(const gboolean show_message_buffering);
+  gboolean get_show_message_buffering() const;
 
-  void set_show_message_tag(gboolean show_message_tag);
-  gboolean get_show_message_tag();
+  void set_show_message_tag(const gboolean show_message_tag);
+  gboolean get_show_message_tag() const;
 
-  void set_show_message_qos(gboolean show_message_qos);
-  gboolean get_show_message_qos();
+  void set_show_message_qos(const gboolean show_message_qos);
+  gboolean get_show_message_qos() const;
 
-  void set_show_message_new_clock(gboolean show_message_new_clock);
-  gboolean get_show_message_new_clock();
+  void set_show_message_new_clock(const gboolean show_message_new_clock);
+  gboolean get_show_message_new_clock() const;
 };
 #endif // BUS_HANDLER_H

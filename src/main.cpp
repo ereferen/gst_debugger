@@ -1,10 +1,9 @@
+#include <cstdio>
 #include <gst/gst.h>
-#include <iostream>
 #include <memory>
 
-#include "bus_handler/bus_handler.h" // Ensure BusHandler is fully declared
-#include "glib.h"
-#include "gst/gstbus.h"
+#include "bus_handler/bus_handler.h"
+#include "input_controller/input_controller.h"
 
 int main(int argc, char *argv[]) {
   // GStreamerの初期化
@@ -13,7 +12,7 @@ int main(int argc, char *argv[]) {
   // パイプラインの作成
   GstElement *pipeline = gst_pipeline_new("test-pipeline");
   if (!pipeline) {
-    std::cerr << "Failed to create pipeline." << std::endl;
+    g_printerr("Failed to create pipeline.\n");
     return -1;
   }
 
@@ -31,12 +30,16 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  // BUSの取得
+  /**
+   * BUSのメッセージ出力設定
+   * - busの取得
+   * - busハンドラの作成
+   * - busハンドラをbusに登録
+   */
   GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
-
-  // バスハンドラの作成
   auto busHandler = std::make_shared<BusHandler>();
-  gst_bus_add_watch(bus, (GstBusFunc)bus_message_callback, busHandler.get());
+  gst_bus_add_watch(bus, (GstBusFunc)bus_handler::bus_message_callback,
+                    busHandler.get());
 
   // プロパティ設定
   g_object_set(source, "pattern", 18, NULL);
@@ -67,6 +70,18 @@ int main(int argc, char *argv[]) {
   // std::cout << "Playing video... Press Ctrl+C to stop." << std::endl;
   g_print("Playing video... Press Ctrl+C to stop.\n");
 
+  /**
+   * 実行中にキー入力を受け付ける設定
+   * - GIOChannelの作成
+   * - GIOChannelに対してキー入力を監視する関数を登録
+   *   - handle_key_input_for_bus_output : busHandlerに対して入力を処理する関数
+   */
+  input_controller::show_input_usage();
+  GIOChannel *io_channel = g_io_channel_unix_new(fileno(stdin));
+  g_io_add_watch(io_channel, G_IO_IN,
+                 input_controller::handle_key_input_for_bus_output,
+                 busHandler.get());
+
   // メインループを開始
   g_main_loop_run(loop);
 
@@ -74,6 +89,7 @@ int main(int argc, char *argv[]) {
   gst_element_set_state(pipeline, GST_STATE_NULL);
   gst_object_unref(pipeline);
   g_main_loop_unref(loop);
+  g_io_channel_unref(io_channel); // GIOChannelの解放
 
   return 0;
 }
